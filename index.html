@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaterWise Monitor v2</title>
+
+    <!-- Client-Side Auth Check -->
+    <script>
+        if (!sessionStorage.getItem('waterwise_signed_in')) {
+            window.location.href = 'login.html';
+        }
+    </script>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Icons: Lucide (via CDN for simplicity, or local if preferred) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <link rel="stylesheet" href="static/css/style.css?v=2">
+</head>
+
+<body>
+    <div class="app-container">
+
+        <!-- Header -->
+        <header class="header">
+            <div class="header-title">
+                <i data-lucide="droplets" class="text-highlight"></i>
+                WaterWise Monitor
+            </div>
+            <div class="header-actions">
+                <!-- Notification Button -->
+                <button class="icon-btn" id="notifyBtn">
+                    <i data-lucide="bell"></i>
+                    <span class="badge"></span>
+                </button>
+                <!-- Notification Dropdown -->
+                <div class="dropdown-menu" id="notifyDropdown">
+                    <div class="dropdown-header">Notifications</div>
+                    <div id="notificationList">
+                        <!-- Mock Static Notifications -->
+                        <div class="dropdown-item">
+                            <i data-lucide="alert-circle" class="icon"></i>
+                            <div class="notification-content">
+                                <span class="notification-msg">Water tank is 90% full.</span>
+                                <span class="notification-time">10 mins ago</span>
+                            </div>
+                        </div>
+                        <div class="dropdown-item">
+                            <i data-lucide="info" class="icon"></i>
+                            <div class="notification-content">
+                                <span class="notification-msg">Daily usage report ready.</span>
+                                <span class="notification-time">2 hours ago</span>
+                            </div>
+                        </div>
+                        <div class="dropdown-item">
+                            <i data-lucide="alert-circle" class="icon"></i>
+                            <div class="notification-content">
+                                <span class="notification-msg">Filter replacement due soon.</span>
+                                <span class="notification-time">1 day ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Button -->
+                <button class="icon-btn" id="userBtn"><i data-lucide="user"></i></button>
+                <!-- User Dropdown -->
+                <div class="dropdown-menu" id="userDropdown" style="width: 200px;">
+                    <div class="dropdown-header">User Profile</div>
+                    <a href="#" class="dropdown-item">
+                        <i data-lucide="user" class="icon"></i>
+                        <div class="notification-content">
+                            <span class="notification-msg">Admin User</span>
+                            <span class="notification-time">Administrator</span>
+                        </div>
+                    </a>
+                    <div style="border-top: 1px solid rgba(0,0,0,0.05); margin: 4px 0;"></div>
+                    <a href="#" class="dropdown-item" id="logoutLink">
+                        <i data-lucide="log-out" class="icon"></i>
+                        <span>Log Out</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <div class="dashboard-grid">
+            <!-- Water Level Card -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Water Level</span>
+                </div>
+                <div class="water-tank-component">
+                    <div class="water-tank-container">
+                        <div class="water-tank-glass">
+                            <div class="water-liquid" style="height: 64%;">
+                                <div class="water-surface">
+                                    <div class="wave"></div>
+                                    <div class="wave"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tank-marks">
+                            <div class="mark major"></div>
+                            <div class="mark"></div>
+                            <div class="mark major"></div>
+                            <div class="mark"></div>
+                            <div class="mark major"></div>
+                        </div>
+                        <!-- Overlay Percentage Text -->
+                        <div class="tank-percentage">
+                            <span id="waterLevelText">64%</span>
+                            <span class="tank-status">FULL</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Water Purity Card -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Water Purity</span>
+                </div>
+                <div class="donut-container">
+                    <svg class="donut-svg" viewBox="0 0 36 36">
+                        <path class="donut-bg"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path class="donut-segment green" stroke-dasharray="92, 100"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    </svg>
+                    <div class="donut-text">
+                        <div class="donut-percent green">92%</div>
+                        <div class="donut-label">PURE</div>
+                    </div>
+                </div>
+                <div class="icon-filter"><i data-lucide="filter" size="20"></i></div>
+            </div>
+
+            <!-- Desired Level Settings -->
+            <div class="card card-full-width">
+                <div class="card-header">
+                    <span class="card-title">Desired Water Level</span>
+                </div>
+                <div class="slider-container">
+                    <div class="slider-info">
+                        <span id="sliderValue" class="slider-value">80%</span>
+                    </div>
+                    <input type="range" min="0" max="100" value="80" id="levelSlider">
+
+                </div>
+            </div>
+
+            <!-- Usage Log -->
+            <div class="card card-full-width">
+                <div class="card-header">
+                    <span class="card-title">Water Usage Log</span>
+                </div>
+
+                <div class="usage-controls">
+                    <div class="usage-tab active" data-period="daily">Daily</div>
+                    <div class="usage-tab" data-period="monthly">Monthly</div>
+                    <div class="usage-tab" data-period="yearly">Yearly</div>
+                </div>
+
+                <div class="date-range-header" id="dateRangeHeader">
+                    <i data-lucide="calendar" size="14"></i>
+                    <span id="dateRangeText">Loading...</span>
+                </div>
+
+                <div class="chart-container" style="position: relative; height:200px; width:100%">
+                    <canvas id="usageChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification Container -->
+        <div id="toast-container" class="toast-container"></div>
+
+        <!-- Chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    </div>
+
+    <!-- Initialize Icons -->
+    <script>
+        lucide.createIcons();
+    </script>
+    <script src="static/js/script.js?v=2"></script>
+
+    <!-- Client-Side Logout Logic -->
+    <script>
+        document.getElementById('logoutLink').addEventListener('click', function (e) {
+            e.preventDefault();
+            sessionStorage.removeItem('waterwise_signed_in');
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+
+</html>
